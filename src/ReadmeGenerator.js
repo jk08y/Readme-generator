@@ -7,16 +7,15 @@ import {
   Copy, 
   PlusCircle, 
   Trash2, 
-  Moon, 
-  Sun, 
-  Share2, 
   Code, 
   BookOpen, 
-  Check 
+  Check,
+  Github,
+  Star,
+  Award
 } from 'lucide-react';
 
 const ReadmeGenerator = () => {
-  const [darkMode, setDarkMode] = useState(false);
   const [readmeContent, setReadmeContent] = useState({
     title: '',
     description: '',
@@ -32,11 +31,13 @@ const ReadmeGenerator = () => {
 
   const [preview, setPreview] = useState('');
   const [copied, setCopied] = useState(false);
+  const [activeSection, setActiveSection] = useState('project');
 
-  // Toggle dark mode
+  // Improved dark mode with gradient background
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-  }, [darkMode]);
+    document.documentElement.classList.add('dark');
+    document.body.classList.add('bg-gradient-to-br', 'from-[#0F172A]', 'via-[#1E293B]', 'to-[#0F172A]');
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -74,7 +75,8 @@ const ReadmeGenerator = () => {
     const badgeTemplates = {
       npm: `https://img.shields.io/npm/v/${readmeContent.title}`,
       build: `https://img.shields.io/github/actions/workflow/status/${readmeContent.title}/build.yml`,
-      license: `https://img.shields.io/github/license/${readmeContent.title}`
+      license: `https://img.shields.io/github/license/${readmeContent.title}`,
+      stars: `https://img.shields.io/github/stars/${readmeContent.title}`
     };
 
     if (badgeTemplates[type]) {
@@ -91,41 +93,41 @@ const ReadmeGenerator = () => {
       : '';
 
     const technologiesSection = readmeContent.technologies.length > 0
-      ? '## Technologies\n' + readmeContent.technologies.filter(t => t.trim() !== '').map(tech => `- ${tech}`).join('\n')
+      ? '## 🛠️ Technologies\n' + readmeContent.technologies.filter(t => t.trim() !== '').map(tech => `- ${tech}`).join('\n')
       : '';
 
     const screenshotsSection = readmeContent.screenshots.length > 0
-      ? '## Screenshots\n' + readmeContent.screenshots.filter(s => s.trim() !== '').map(screenshot => `![Screenshot](${screenshot})`).join('\n')
+      ? '## 📸 Screenshots\n' + readmeContent.screenshots.filter(s => s.trim() !== '').map(screenshot => `![Screenshot](${screenshot})`).join('\n')
       : '';
 
     const readme = `${badgesSection}
 
-# ${readmeContent.title}
+# 📦 ${readmeContent.title}
 
-## Description
+## 📝 Description
 ${readmeContent.description}
 
 ${technologiesSection}
 
-## Features
+## ✨ Features
 ${readmeContent.features.filter(f => f.trim() !== '').map(feature => `- ${feature}`).join('\n')}
 
-## Installation
+## 🚀 Installation
 \`\`\`bash
 ${readmeContent.installation.filter(i => i.trim() !== '').join('\n')}
 \`\`\`
 
-## Usage
+## 💡 Usage
 \`\`\`
 ${readmeContent.usage.filter(u => u.trim() !== '').join('\n')}
 \`\`\`
 
 ${screenshotsSection}
 
-## Contributing
+## 🤝 Contributing
 ${readmeContent.contributing}
 
-## License
+## 📄 License
 ${readmeContent.license}
 `;
     setPreview(readme);
@@ -145,10 +147,12 @@ ${readmeContent.license}
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Reusable input rendering function
-  const renderArrayInput = (field, label, placeholder) => (
-    <div>
-      <label className="block mb-2 font-semibold dark:text-gray-200">{label}</label>
+  const renderArrayInput = (field, label, placeholder, icon) => (
+    <div className="bg-slate-800 p-4 rounded-lg shadow-xl border border-slate-700">
+      <label className="flex items-center mb-2 font-semibold text-slate-200">
+        {icon}
+        <span className="ml-2">{label}</span>
+      </label>
       {readmeContent[field].map((item, index) => (
         <div key={index} className="flex items-center mb-2 space-x-2">
           <input
@@ -156,12 +160,12 @@ ${readmeContent.license}
             value={item}
             onChange={(e) => handleArrayChange(field, index, e.target.value)}
             placeholder={`${placeholder} ${index + 1}`}
-            className="flex-grow p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="flex-grow p-2 bg-slate-700 border border-slate-600 rounded text-white focus:ring-2 focus:ring-blue-500 transition-all"
           />
           {index > 0 && (
             <button 
               onClick={() => removeArrayItem(field, index)}
-              className="text-red-500 hover:text-red-700 dark:text-red-400"
+              className="text-red-400 hover:text-red-600 transition-colors"
             >
               <Trash2 size={20} />
             </button>
@@ -170,7 +174,7 @@ ${readmeContent.license}
       ))}
       <button 
         onClick={() => addArrayItem(field)}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center dark:bg-blue-600 dark:hover:bg-blue-700"
+        className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center transition-colors"
       >
         <PlusCircle className="mr-2" /> Add {label}
       </button>
@@ -178,134 +182,129 @@ ${readmeContent.license}
   );
 
   return (
-    <div className={`container mx-auto p-6 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50'} min-h-screen transition-colors`}>
-      <div className={`max-w-4xl mx-auto ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg rounded-lg overflow-hidden`}>
-        <div className={`${darkMode ? 'bg-blue-800' : 'bg-blue-600'} text-white p-4 flex items-center justify-between`}>
+    <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] text-white p-6">
+      <div className="max-w-6xl mx-auto bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-800">
+        <div className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 flex items-center justify-between">
           <div className="flex items-center">
-            <FileText className="mr-3" />
-            <h1 className="text-2xl font-bold">README Generator</h1>
+            <FileText className="mr-3" size={32} />
+            <h1 className="text-3xl font-bold tracking-wide">README Generator</h1>
           </div>
-          <button 
-            onClick={() => setDarkMode(!darkMode)}
-            className="hover:bg-blue-700 p-2 rounded-full"
-          >
-            {darkMode ? <Sun size={24} /> : <Moon size={24} />}
-          </button>
+          <div className="flex items-center space-x-2">
+            <Github size={24} className="text-white" />
+            <span className="text-sm">Generate Pro READMEs</span>
+          </div>
         </div>
 
-        <div className="p-6 grid md:grid-cols-2 gap-6">
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Input Section */}
-          <div>
-            <h2 className={`text-xl font-semibold mb-4 flex items-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              <Edit className={`mr-2 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
-              Project Details
-            </h2>
+          <div className="space-y-4">
+            <div className="flex space-x-4 mb-4">
+              {['project', 'badges', 'details'].map((section) => (
+                <button
+                  key={section}
+                  onClick={() => setActiveSection(section)}
+                  className={`px-4 py-2 rounded-lg transition-all ${
+                    activeSection === section 
+                      ? 'bg-blue-700 text-white' 
+                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                  }`}
+                >
+                  {section.charAt(0).toUpperCase() + section.slice(1)} Details
+                </button>
+              ))}
+            </div>
 
-            <div className="space-y-4">
-              <input
-                type="text"
-                name="title"
-                placeholder="Project Title"
-                value={readmeContent.title}
-                onChange={handleInputChange}
-                className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : ''}`}
-              />
+            {activeSection === 'project' && (
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  name="title"
+                  placeholder="Project Title"
+                  value={readmeContent.title}
+                  onChange={handleInputChange}
+                  className="w-full p-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
+                />
 
-              <textarea
-                name="description"
-                placeholder="Project Description"
-                value={readmeContent.description}
-                onChange={handleInputChange}
-                className={`w-full p-2 border rounded h-24 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : ''}`}
-              />
+                <textarea
+                  name="description"
+                  placeholder="Project Description"
+                  value={readmeContent.description}
+                  onChange={handleInputChange}
+                  className="w-full p-3 bg-slate-800 border border-slate-700 rounded-lg text-white h-32 focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            )}
 
-              {/* Badges Section */}
-              <div>
-                <label className={`block mb-2 font-semibold ${darkMode ? 'text-gray-200' : ''}`}>Add Badges</label>
-                <div className="flex space-x-2 mb-2">
-                  <button 
-                    onClick={() => addBadge('npm')} 
-                    className={`px-3 py-1 rounded ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
-                  >
-                    NPM
-                  </button>
-                  <button 
-                    onClick={() => addBadge('build')} 
-                    className={`px-3 py-1 rounded ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
-                  >
-                    Build
-                  </button>
-                  <button 
-                    onClick={() => addBadge('license')} 
-                    className={`px-3 py-1 rounded ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
-                  >
-                    License
-                  </button>
+            {activeSection === 'badges' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { type: 'npm', icon: <Award size={20} />, label: 'NPM Version' },
+                    { type: 'build', icon: <Code size={20} />, label: 'Build Status' },
+                    { type: 'license', icon: <BookOpen size={20} />, label: 'License' },
+                    { type: 'stars', icon: <Star size={20} />, label: 'GitHub Stars' }
+                  ].map((badge) => (
+                    <button
+                      key={badge.type}
+                      onClick={() => addBadge(badge.type)}
+                      className="flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 p-3 rounded-lg transition-colors"
+                    >
+                      {badge.icon}
+                      <span>{badge.label}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
+            )}
 
-              {renderArrayInput('features', 'Features', 'Feature')}
-              {renderArrayInput('technologies', 'Technologies', 'Technology')}
-              {renderArrayInput('installation', 'Installation Steps', 'Step')}
-              {renderArrayInput('usage', 'Usage Examples', 'Example')}
-              {renderArrayInput('screenshots', 'Screenshots', 'Screenshot URL')}
-
-              <textarea
-                name="contributing"
-                placeholder="Contributing Guidelines"
-                value={readmeContent.contributing}
-                onChange={handleInputChange}
-                className={`w-full p-2 border rounded h-24 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : ''}`}
-              />
-
-              <div className="flex space-x-4">
-                <button 
-                  onClick={generateReadme}
-                  className={`${darkMode ? 'bg-green-700 hover:bg-green-800' : 'bg-green-500 hover:bg-green-600'} text-white px-4 py-2 rounded flex items-center`}
-                >
-                  <Eye className="mr-2" /> Generate Preview
-                </button>
+            {activeSection === 'details' && (
+              <div className="space-y-4">
+                {renderArrayInput('features', 'Features', 'Feature', <Award size={20} className="text-blue-400" />)}
+                {renderArrayInput('technologies', 'Technologies', 'Technology', <Code size={20} className="text-green-400" />)}
+                {renderArrayInput('installation', 'Installation Steps', 'Step', <Download size={20} className="text-purple-400" />)}
+                {renderArrayInput('usage', 'Usage Examples', 'Example', <Eye size={20} className="text-teal-400" />)}
               </div>
-            </div>
+            )}
+
+            <button 
+              onClick={generateReadme}
+              className="w-full bg-blue-700 hover:bg-blue-600 text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors"
+            >
+              <Eye className="mr-2" /> Generate README Preview
+            </button>
           </div>
 
           {/* Preview Section */}
           <div>
-            <h2 className={`text-xl font-semibold mb-4 flex items-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              <BookOpen className={`mr-2 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
-              Preview
+            <h2 className="text-2xl font-semibold mb-4 flex items-center text-white">
+              <BookOpen className="mr-2 text-blue-400" size={24} />
+              README Preview
             </h2>
             
             {preview ? (
               <div className="relative">
-                <pre className={`${darkMode ? 'bg-gray-700 text-gray-200' : 'bg-gray-100'} p-4 rounded overflow-auto max-h-[600px] text-sm`}>
+                <pre className="bg-slate-800 p-4 rounded-lg overflow-auto max-h-[600px] text-sm border border-slate-700 shadow-xl">
                   {preview}
                 </pre>
                 <div className="absolute top-2 right-2 flex space-x-2">
                   <button 
                     onClick={copyToClipboard}
-                    className={`${copied ? 'bg-green-500' : darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white p-2 rounded`}
+                    className={`${copied ? 'bg-green-600' : 'bg-blue-700 hover:bg-blue-600'} text-white p-2 rounded transition-colors`}
                     title={copied ? 'Copied!' : 'Copy to Clipboard'}
                   >
                     {copied ? <Check size={16} /> : <Copy size={16} />}
                   </button>
                   <button 
                     onClick={downloadReadme}
-                    className={`${darkMode ? 'bg-green-700 hover:bg-green-800' : 'bg-green-500 hover:bg-green-600'} text-white p-2 rounded`}
+                    className="bg-green-700 hover:bg-green-600 text-white p-2 rounded transition-colors"
                     title="Download README"
                   >
                     <Download size={16} />
                   </button>
-                  <button 
-                    className={`${darkMode ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-500 hover:bg-purple-600'} text-white p-2 rounded`}
-                    title="Share README"
-                  >
-                    <Share2 size={16} />
-                  </button>
                 </div>
               </div>
             ) : (
-              <div className={`${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-500'} p-4 rounded text-center`}>
+              <div className="bg-slate-800 p-4 rounded-lg text-center border border-slate-700">
                 Generate preview by filling out the details
               </div>
             )}
