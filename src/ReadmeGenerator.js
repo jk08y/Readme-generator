@@ -47,6 +47,28 @@ const ReadmeGenerator = () => {
   const [activeSection, setActiveSection] = useState('project');
   const [templateMode, setTemplateMode] = useState('default');
 
+  // Copy to Clipboard Function
+  const copyToClipboard = useCallback(() => {
+    navigator.clipboard.writeText(preview).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+  }, [preview]);
+
+  // Download README Function
+  const downloadReadme = useCallback(() => {
+    const blob = new Blob([preview], { type: 'text/markdown' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${readmeContent.title.replace(/\s+/g, '-').toLowerCase()}-README.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  }, [preview, readmeContent.title]);
+
   // Enhanced dark mode setup
   useEffect(() => {
     document.documentElement.classList.add('dark');
@@ -97,7 +119,7 @@ const ReadmeGenerator = () => {
       ...prev,
       [field]: newArray
     }));
-  }, []);
+  }, [readmeContent]);
 
   // Advanced badge generation with more options
   const addBadge = useCallback((type) => {
